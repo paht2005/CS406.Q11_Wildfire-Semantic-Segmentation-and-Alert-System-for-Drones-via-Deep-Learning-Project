@@ -7,7 +7,7 @@
 <h1 align="center"><b>CS406.Q11 – Image Processing and Applications</b></h1>
 
 ---
-# CS406 Course Project: Wildfire Semantic Segmentation and Alert System for UAVs/Drones via Deep Learning
+# **CS406 Course Project: Wildfire Semantic Segmentation and Alert System for UAVs/Drones via Deep Learning**
 
 > This repository contains the implementation of a **Wildfire Detection and Alert System** based on **semantic segmentation using deep learning**, developed for the course **CS406.Q11 – Image Processing and Applications** at the **University of Information Technology (UIT – VNU-HCM)**.
 >
@@ -15,7 +15,7 @@
 
 ---
 
-## Team Information
+## **Team Information**
 | No. | Student ID | Full Name | Role | Github | Email |
 |----:|:----------:|-----------|------|--------|-------|
 | 1 | 23520032 | Truong Hoang Thanh An | Member | [Awnpz](https://github.com/Awnpz) | 23520032@gm.uit.edu.vn  |
@@ -25,7 +25,7 @@
 
 ---
 
-## Table of Contents
+## **Table of Contents**
 - [Features](#features)
 - [Dataset](#dataset)
 - [Repository Structure](#repository-structure)
@@ -39,7 +39,7 @@
 
 ---
 
-## Features
+## **Features**
 - **Wildfire Semantic Segmentation** using U-Net with ResNet encoders.
 - **Pixel-level fire mask prediction** from aerial RGB images.
 - **Processed FLAME Dataset** with train/validation/test splits.
@@ -52,7 +52,7 @@
 
 ---
 
-## Dataset
+## **Dataset**
 ### FLAME Dataset
 - **Source**: All evaluations are conducted using the FLAME Dataset, published on IEEE DataPort. Dataset access: [FLAME Dataset on IEEE DataPort](https://ieee-dataport.org/open-access/flame-dataset-aerial-imagery-pile-burn-detection-using-drones-uavs)
 - **Original format**:
@@ -66,7 +66,7 @@
 
 ---
 
-## Repository Structure
+## **Repository Structure**
 ```
 CS406.Q11_Wildfire-Semantic-Segmentation-and-Alert-System-for-Drones-via-Deep-Learning-Project/
 ├── dataset-raw/ # Original FLAME dataset structure
@@ -108,7 +108,7 @@ CS406.Q11_Wildfire-Semantic-Segmentation-and-Alert-System-for-Drones-via-Deep-Le
 
 ```
 
-## Methodology
+## **Methodology**
 
 ### 1. Semantic Segmentation Model
 - Architecture: **U-Net**
@@ -138,7 +138,7 @@ To reduce false positives in video streams:
 
 ---
 
-## Installation
+## **Installation**
 
 ### 1. Clone repository
 ```bash
@@ -159,7 +159,7 @@ pip install -r requirements.txt
 ```
 
 --- 
-## Usage
+## **Usage**
 
 ### Dataset preprocessing
 ```bash
@@ -175,7 +175,7 @@ jupyter notebook src/model-evaluation.ipynb
 ```
 
 ---
-## Demo Application
+## **Demo Application**
 Run the Gradio demo for video-based wildfire detection:
 ```bash
 python gradio_app.py
@@ -185,7 +185,7 @@ python gradio_app.py
 - View alert metadata in real time
 
 --- 
-## Results
+## **Results**
 - Accurate pixel-level wildfire segmentation on the FLAME dataset.
 - Stable alert triggering thanks to temporal persistence filtering.
 - Demonstrates feasibility of UAV-based wildfire monitoring using deep learning.
@@ -193,6 +193,11 @@ python gradio_app.py
 > Detailed quantitative results will be reported in the final project report.
 
 ---
-## Conclusion
+## **Conclusion**
 This project demonstrates the effectiveness of** deep learning–based semantic segmentation** for early wildfire detection using aerial imagery. 
 By combining pixel-level fire segmentation with temporal analysis and alert logic, the system provides a robust foundation for real-time wildfire monitoring using UAVs.
+
+--- 
+## **License**
+This project is for academic use in the course **CS406.Q11 – Image Processing and Applications** at UIT – VNU-HCM.
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
