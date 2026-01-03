@@ -115,29 +115,27 @@ CS406.Q11_Wildfire-Semantic-Segmentation-and-Alert-System-for-Drones-via-Deep-Le
 
 ## **Methodology**
 
-[cite_start]The system follows a modular pipeline designed through computational thinking principles (Abstraction, Decomposition, and Pattern Recognition) to transform raw sensor data into actionable wildfire alerts[cite: 163, 166].
+The system follows a modular pipeline designed through computational thinking principles (Abstraction, Decomposition, and Pattern Recognition) to transform raw sensor data into actionable wildfire alerts.
 
 ### **1. Semantic Segmentation Architecture**
-* [cite_start]**Core Model**: The system utilizes a **U-Net** architecture, a premier choice for biomedical and environmental image segmentation due to its symmetrical encoder-decoder structure[cite: 28, 141].
-* **Encoders**: We implemented **ResNet34** and **ResNet50** backbones to leverage deep residual learning, enhancing feature extraction from complex forest textures.
-* **Loss Functions**: To address the class imbalance inherent in wildfire imagery (where fire pixels occupy a small fraction of the frame), we experimented with **Binary Cross-Entropy (BCE)** and a **Composite 3-Loss function** (BCE + Dice Loss + IoU Loss) to optimize both pixel-wise accuracy and region overlap.
+- **Core Model**: The system utilizes a **U-Net** architecture, a premier choice for biomedical and environmental image segmentation due to its symmetrical encoder-decoder structure.
+- **Encoders**: We implemented **ResNet34** and **ResNet50** backbones to leverage deep residual learning, enhancing feature extraction from complex forest textures.
+- **Loss Functions**: To address the class imbalance inherent in wildfire imagery (where fire pixels occupy a small fraction of the frame), we experimented with **Binary Cross-Entropy (BCE)** and a **Composite 3-Loss function** (BCE + Dice Loss + IoU Loss) to optimize both pixel-wise accuracy and region overlap.
 
 ### **2. Multi-Modal Feature Recognition**
 The model is trained to recognize distinct wildfire patterns across two spectrums:
-* [cite_start]**RGB Visual Cues**: Identifying irregular, high-intensity color clusters (red, orange, yellow) and the soft-edged, upward-moving cloud textures characteristic of smoke[cite: 66, 68].
-* [cite_start]**Thermal Signatures**: Detecting localized "heat blobs" or saturated spots that represent physical temperature anomalies, allowing the system to filter out visual artifacts like sunlight glare or lens flare[cite: 76, 111].
-
-
+* **RGB Visual Cues**: Identifying irregular, high-intensity color clusters (red, orange, yellow) and the soft-edged, upward-moving cloud textures characteristic of smoke.
+* **Thermal Signatures**: Detecting localized "heat blobs" or saturated spots that represent physical temperature anomalies, allowing the system to filter out visual artifacts like sunlight glare or lens flare.
 
 ### **3. Temporal Consistency & Alert Logic**
 To ensure high reliability and minimize false positives in live video streams, we implemented a temporal validation loop:
 * **Hysteresis Thresholding**: Instead of a single static threshold, the system uses dual-score thresholds:
-    * [cite_start]**EVENT_ON ($\ge 0.6$)**: Triggers the **FIRE** state[cite: 257, 270].
-    * [cite_start]**EVENT_OFF ($< 0.4$)**: Resets the system to **NO_FIRE**[cite: 257, 272].
-* [cite_start]**Persistence Analysis**: A fire alert is only issued if the detection persists across consecutive frames within a 3-second check interval, ensuring that transient glares are ignored[cite: 258, 276].
+    * **EVENT_ON ($\ge 0.6$)**: Triggers the **FIRE** state.
+    * **EVENT_OFF ($< 0.4$)**: Resets the system to **NO_FIRE**.
+* **Persistence Analysis**: A fire alert is only issued if the detection persists across consecutive frames within a 3-second check interval, ensuring that transient glares are ignored.
 
 ### **4. Geospatial Localization**
-[cite_start]For every detected fire region, the system calculates the geometric centroid of the segmentation mask[cite: 43, 225]. [cite_start]By fusing the drone's real-time **GPS coordinates** (latitude, longitude, altitude) with camera orientation metadata (yaw, pitch, roll), the system estimates the ground-truth coordinates of the fire using the **Haversine formula**[cite: 225, 336].
+For every detected fire region, the system calculates the geometric centroid of the segmentation mask[cite: 43, 225]. [cite_start]By fusing the drone's real-time **GPS coordinates** (latitude, longitude, altitude) with camera orientation metadata (yaw, pitch, roll), the system estimates the ground-truth coordinates of the fire using the **Haversine formula**.
 
 ---
 
@@ -210,11 +208,27 @@ demo/demo_gif.gif
 
 --- 
 ## **Results**
-- Accurate pixel-level wildfire segmentation on the FLAME dataset.
-- Stable alert triggering thanks to temporal persistence filtering.
-- Demonstrates feasibility of UAV-based wildfire monitoring using deep learning.
 
 > Detailed quantitative results will be reported in the final project report.
+
+The system was rigorously evaluated on the **FLAME Dataset** test set. Our experiments focused on the impact of data augmentation and loss function optimization on segmentation precision.
+
+### **Table 1: Comparative Performance Metrics**
+
+| Method | Accuracy | $F_2$-score | IoU | Precision | Recall |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| Unet + BCE | 0.9978 | 0.7228 | 0.6396 | 0.8992 | 0.6890 |
+| Unet + BCE + Aug | 0.9981 | 0.7672 | 0.6892 | **0.9129** | 0.7377 |
+| Unet + 3 Loss | 0.9980 | 0.7740 | 0.6847 | 0.8870 | 0.7501 |
+| **Unet + 3 Loss + Aug** | **0.9982** | **0.8162** | **0.7139** | 0.8627 | **0.8054** |
+
+
+
+### **Key Performance Insights**
+* **Segmentation Quality (IoU)**: The best-performing model (Unet + 3 Loss + Aug) achieved an **Intersection over Union (IoU) of 0.7139**, significantly exceeding our 60% minimum requirement. This ensures that fire boundaries are accurately delineated for emergency responders.
+* **Alert Robustness ($F_2$-score)**: We prioritized **Recall** over Precision using the $F_2$-score to ensure no real fires are missed. The system achieved an **$F_2$-score of 0.8162**, surpassing our 75% reliability target.
+* **Localization Precision**: Through spatio-temporal tracking, the average geographic error remained under **50 meters**, providing high-fidelity guidance for ground-based containment efforts.
+
 
 ---
 ## **Conclusion**
