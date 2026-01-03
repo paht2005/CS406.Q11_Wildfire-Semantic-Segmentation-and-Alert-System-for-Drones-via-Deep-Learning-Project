@@ -15,7 +15,7 @@
 
 
 <p align="center">
-  <img src="thumbnail.png" alt="thumbnaill" width="400">
+  <img src="thumbnail.png" alt="thumbnaill" width="600">
 </p>
 
 ---
@@ -70,7 +70,7 @@
 - Masks → Binary wildfire segmentation masks
 
 <p align="center">
-  <img src="demo/data.png" alt="demo data" width="400">
+  <img src="demo/data.png" alt="demo data" width="600">
 </p>
 
 ---
