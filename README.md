@@ -135,7 +135,7 @@ To ensure high reliability and minimize false positives in live video streams, w
 * **Persistence Analysis**: A fire alert is only issued if the detection persists across consecutive frames within a 3-second check interval, ensuring that transient glares are ignored.
 
 ### **4. Geospatial Localization**
-For every detected fire region, the system calculates the geometric centroid of the segmentation mask[cite: 43, 225]. [cite_start]By fusing the drone's real-time **GPS coordinates** (latitude, longitude, altitude) with camera orientation metadata (yaw, pitch, roll), the system estimates the ground-truth coordinates of the fire using the **Haversine formula**.
+For every detected fire region, the system calculates the geometric centroid of the segmentation mask. By fusing the drone's real-time **GPS coordinates** (latitude, longitude, altitude) with camera orientation metadata (yaw, pitch, roll), the system estimates the ground-truth coordinates of the fire using the **Haversine formula**.
 
 ---
 
