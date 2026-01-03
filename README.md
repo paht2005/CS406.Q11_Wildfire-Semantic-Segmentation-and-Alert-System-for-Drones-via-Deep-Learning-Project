@@ -237,7 +237,7 @@ The system was rigorously evaluated on the **FLAME Dataset** test set. Our exper
 
 ---
 ## **Conclusion**
-This project demonstrates the effectiveness of** deep learning–based semantic segmentation** for early wildfire detection using aerial imagery. 
+This project demonstrates the effectiveness of **deep learning–based semantic segmentation** for early wildfire detection using aerial imagery. 
 By combining pixel-level fire segmentation with temporal analysis and alert logic, the system provides a robust foundation for real-time wildfire monitoring using UAVs.
 
 --- 
