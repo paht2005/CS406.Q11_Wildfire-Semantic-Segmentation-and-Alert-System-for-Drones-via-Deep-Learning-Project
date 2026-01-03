@@ -20,7 +20,7 @@
 
 ---
 
-## **Team Information**
+## **Group (ID - Group Name - Team Information):** 9 - Thăng Sắc
 | No. | Student ID | Full Name | Role | Github | Email |
 |----:|:----------:|-----------|------|--------|-------|
 | 1 | 23520032 | Truong Hoang Thanh An | Member | [Awnpz](https://github.com/Awnpz) | 23520032@gm.uit.edu.vn  |
