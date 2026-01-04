@@ -109,11 +109,11 @@ CS406.Q11_Wildfire-Semantic-Segmentation-and-Alert-System-for-Drones-via-Deep-Le
 │ └── demo_gif.gif
 │
 ├── gradio_app.py # Gradio demo application
-├── requirements.txt
-├── .gitignore
+├── requirements.txt  # Global Python dependencies
+├── .gitignore # Git exclusion rules
 ├── LICENSE
 ├── thumbnail.png
-└── README.md
+└── README.md # Main project documentation
 
 ```
 
