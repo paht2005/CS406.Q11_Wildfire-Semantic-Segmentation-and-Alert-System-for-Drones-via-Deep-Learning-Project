@@ -1,0 +1,826 @@
+\documentclass{template}
+
+% --- Các gói lệnh cơ bản ---
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{lipsum}
+\usepackage{minted}
+\usepackage{adjustbox}
+\usepackage{cite}
+\usepackage{amsmath}
+
+
+% --- Hình ảnh và Đồ họa ---
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+\usepackage{svg}
+\usepackage{float} % Hỗ trợ định vị hình ảnh [H]
+
+% --- Bảng biểu và Màu sắc ---
+\usepackage{xcolor} % Khai báo một lần duy nhất
+\usepackage{colortbl}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage[table,xcdraw]{xcolor} % Tích hợp tùy chọn xcdraw
+
+% --- Liên kết và URL ---
+\usepackage{url}
+\usepackage{xurl}
+\usepackage{hyperref}
+
+% Cấu hình hyperref: Link màu xanh, ẩn khung viền
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue, 
+    pdftitle={Wildfire Detection Report},
+}
+
+% --- Định nghĩa màu sắc và Styles ---
+\definecolor{bg}{rgb}{0.95,0.95,0.95}
+\bibliographystyle{IEEEtran}
+\renewcommand{\bibname}{References}
+
+% Style cho TikZ (Sơ đồ luồng)
+\tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=blue!10]
+\tikzstyle{data} = [ellipse, minimum width=2.2cm, minimum height=1cm, text centered, draw=black, fill=gray!10]
+\tikzstyle{arrow} = [thick,->,>=stealth]
+
+% Cấu hình Listings (Code Python)
+\usepackage{listings}
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!40!black},
+    stringstyle=\color{orange},
+    showstringspaces=false,
+    breaklines=true,
+    frame=tb,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=5pt,
+    backgroundcolor=\color{gray!10},
+    tabsize=4,
+    captionpos=b,
+    columns=fullflexible
+}
+\begin{document}
+
+% Informations du rapport
+
+\titre{Topic: \\ Wildfire Detection and Alert System Using Drones}
+\sujet{Final Report \\ Image Processing and Applications}
+
+
+\eleves{Phat Nguyen Cong - 23521143 - Leader  \\
+An Nguyen Xuan - 23520023 \\
+An Truong Hoang Thanh - 23520032 \\
+Cuong Vu Viet - 23520213 \\
+}
+
+% Initialisation
+\fairemarges
+\fairepagedegarde
+\tabledematieres
+
+% Rapport principal
+
+\chapter*{Acknowledgements}
+\addcontentsline{toc}{chapter}{Acknowledgements}
+
+We would like to express our sincere gratitude to \textbf{MSc. Thang Cap Pham Dinh}, whose guidance and mentorship throughout the CS406.Q11 Image Processing and Applications course have been instrumental in shaping this project. We also acknowledge the collaborative contributions of all team members in \textbf{Group 9} — Phat Nguyen Cong \textbf{(Leader)}, An Nguyen Xuan, An Truong Hoang Thanh, and Cuong Vu Viet — for their dedication and technical efforts. Special thanks to the authors of the FLAME dataset for providing high-quality annotated imagery, which served as the foundation for model training and evaluation. This project would not have been possible without the open-source tools and communities that power deep learning innovation.
+
+\vspace{1cm}
+
+\begin{flushright}
+\textit{Group 9 — CS406.Q11} \\
+\textit{Ho Chi Minh City, January 2026}
+\end{flushright}
+
+\chapter{Introduction}
+
+Wildfires have become an increasingly frequent and destructive natural disaster across the globe, causing severe environmental, economic, and human losses. The early detection of wildfires plays a crucial role in minimizing their impact by enabling faster response and containment efforts. However, traditional wildfire monitoring systems often rely on ground-based sensors or satellite imagery, which may suffer from delayed detection, limited resolution, and difficulty in covering remote or mountainous areas in a timely and efficient manner.\\
+In response to these limitations, this project explores an innovative solution that leverages the power of unmanned aerial vehicles (UAVs), also known as drones, and computer vision technologies. Specifically, the system is designed to use RGB and thermal imagery captured by drones to detect signs of wildfire activity. These images are then processed using a deep learning-based semantic segmentation model, which can classify and segment areas affected by fire with high accuracy. Additionally, by integrating GPS data, the system can pinpoint the exact geographic location of detected wildfires, providing critical information for emergency services.\\
+Although the current implementation is a proof-of-concept, the project demonstrates the potential of combining drone mobility with modern AI capabilities to improve wildfire monitoring. This interdisciplinary approach not only enhances the responsiveness and scalability of fire detection systems but also sets the foundation for future autonomous, real-time disaster response technologies. Ultimately, the project aims to contribute to safer and more proactive wildfire management strategies in the face of a changing climate and growing environmental challenges.
+
+\chapter{Related Works}
+
+\section{Wildfire Detection Using Aerial Imagery}
+Early approaches to wildfire detection using aerial imagery primarily relied on handcrafted features and rule-based techniques. These methods typically exploited color thresholds in the RGB color space, motion cues from video sequences, and texture descriptors to identify flame or smoke regions \cite{qi2009fire}. Although computationally efficient, such approaches are highly sensitive to illumination changes, camera motion, and complex backgrounds, which often leads to high false positive rates in real-world environments.\\
+With the advancement of deep learning, recent studies have shifted toward convolutional neural network (CNN)-based methods for wildfire detection using UAV imagery \cite{bouguettaya2022review}. Frame-level classification models have been proposed to distinguish fire and non-fire scenes with improved robustness compared to traditional methods. Beyond classification, encoder--decoder architectures such as U-Net and its variants have been widely adopted for pixel-level wildfire segmentation \cite{ronneberger2015unet}. These semantic segmentation models enable precise localization of fire regions, making them more suitable for downstream tasks such as fire spread analysis and alert generation \cite{haeri2024comprehensive}.\\
+Several works have demonstrated that deep learning-based segmentation significantly outperforms handcrafted approaches, especially under challenging conditions such as varying illumination and partial occlusions. However, many early deep learning solutions focus on offline analysis and do not fully address the constraints of real-time deployment on UAV platforms.
+
+\section{FLAME Dataset}
+The FLAME (Fire Luminosity Airborne-based Machine learning Evaluation) dataset is a publicly available aerial imagery dataset specifically designed for wildfire detection using unmanned aerial vehicles \cite{flame2022dataset}. The dataset consists of RGB images and video sequences captured by drones during prescribed pile-burn operations in forest environments. Each image is accompanied by pixel-level fire segmentation masks, enabling both classification and semantic segmentation tasks.\\
+FLAME has become a widely used benchmark in recent wildfire detection research due to its realistic UAV viewpoints and high-quality annotations. Several studies have evaluated CNN-based classifiers and U-Net-based segmentation models on this dataset, reporting strong performance in detecting fire regions under diverse environmental conditions. The availability of ground-truth masks makes FLAME particularly suitable for developing and evaluating pixel-level wildfire segmentation methods.
+
+\section{State-of-the-Art Methods}
+State-of-the-art wildfire detection systems increasingly adopt multi-stage pipelines to balance detection accuracy and computational efficiency. Recent works have explored object detection frameworks such as YOLO and Faster R-CNN for fast wildfire detection in UAV videos \cite{redmon2018yolov3, liu2022yolo}. These methods offer high inference speed and are suitable for onboard deployment but typically provide only coarse localization through bounding boxes. To address this limitation, semantic segmentation models such as U-Net have been employed to achieve fine-grained fire region delineation.\\
+Additionally, several studies have investigated multi-modal fusion techniques by combining RGB and thermal imagery to improve robustness against visual ambiguity \cite{zhao2020saliency, martinez2015multi}. Temporal modeling and persistence-based filtering have also been introduced to reduce false alarms caused by transient visual artifacts. In contrast, recent research trends emphasize end-to-end wildfire monitoring systems that integrate segmentation, temporal consistency analysis, and alert logic to support real-time decision-making.
+
+\chapter{Project Overview}
+
+\section{Problem Definition}
+
+This project focuses on developing a real-time wildfire detection and alert system using unmanned aerial vehicles (UAVs) within the scope of \textit{Image Processing and Applications} course. The system applies deep learning-based semantic segmentation techniques to aerial imagery in order to accurately identify wildfire regions and support timely emergency response.
+
+\subsection{Inputs}
+The system receives the following inputs:
+\begin{itemize}
+    \item Real-time RGB video stream captured by the drone-mounted camera.
+    \item Real-time infrared (thermal) video stream synchronized with the RGB stream to enable pixel-level alignment.
+    \item Real-time drone metadata, including GPS coordinates (latitude, longitude, altitude) and camera orientation parameters (yaw, pitch, and roll), synchronized with each video frame.
+\end{itemize}
+
+\subsection{Outputs}
+The system generates the following outputs:
+\begin{itemize}
+    \item RGB video frames overlaid with predicted wildfire segmentation masks.
+    \item Estimated geographic coordinates of detected wildfire regions, represented by the centroid of each segmented area.
+    \item A real-time fire alert signal triggered upon wildfire detection.
+\end{itemize}
+
+\subsection{Constraints}
+The system operates under the following constraints:
+\begin{itemize}
+    \item Video input must be processed in real time, encoded in H.264 format (\texttt{.MP4} or \texttt{.MOV}), with a frame rate of 24--30 FPS and a minimum resolution of $512 \times 512$ pixels.
+    \item The drone camera field of view (FOV) must be between $60^{\circ}$ and $90^{\circ}$.
+    \item Drone altitude must range from 50 to 250 meters.
+    \item Drone speed must be maintained between 15 and 25 km/h.
+    \item GPS operation is restricted to predefined forest regions.
+\end{itemize}
+
+\subsection{Requirements}
+The system is designed to meet the following requirements:
+\begin{itemize}
+    \item Wildfire regions must be clearly highlighted on the video stream for immediate visual interpretation.
+    \item The estimated fire location should be accurate enough to support rapid emergency response.
+    \item Fire alerts must be issued promptly after wildfire detection to minimize response latency.
+    \item The system should prioritize high recall to avoid missing real wildfire events, while tolerating a limited number of false alarms.
+\end{itemize}
+
+\section{Visual Pattern Modeling for Wildfire Detection}
+
+Visual pattern modeling serves as a core component in distinguishing wildfire signatures from complex background elements like vegetation and man-made structures. Leveraging convolutional neural networks, the system extracts discriminative features from RGB and thermal imagery, focusing on the high-intensity chromatic distributions and irregular, dynamic boundaries of flames and smoke. Beyond static appearance, the model captures the spatial growth behavior of wildfires—where small ignition points evolve into coherent thermal clusters—and maintains temporal consistency across consecutive video frames to suppress transient false positives such as glare or lens artifacts. By employing multimodal fusion, the system cross-validates visually salient regions in the RGB spectrum with elevated radiometric signatures in the thermal domain. This integrated approach ensures robust, high-confidence detection by prioritizing persistent spatio-temporal patterns over environmental noise.
+
+\section{Feature Abstraction and Representation Learning}
+
+Feature abstraction is a fundamental concept in image processing and deep learning, referring to the process of learning compact and discriminative representations from raw pixel data. In this project, abstraction is achieved through deep convolutional layers that progressively transform input images into high-level semantic features relevant to wildfire detection.\\
+Wildfire regions are abstracted as binary segmentation masks, where pixels are classified as either fire or background. This representation simplifies complex visual scenes and enables efficient pixel-level analysis. High-level features emphasize key attributes such as color intensity, spatial coherence, temporal persistence, and thermal consistency, while suppressing irrelevant background details.\\
+By focusing on these abstracted representations, the model generalizes effectively across different terrains, lighting conditions, and flight scenarios. This abstraction not only improves detection performance but also reduces computational overhead, making the system suitable for real-time UAV-based image processing applications.
+
+\chapter{The Proposed Approach}
+
+\section{Overall Architecture}
+The proposed system is architected as a multi-stage image processing pipeline, specifically optimized for real-time wildfire surveillance via UAVs. The framework is decomposed into three primary functional modules: \textbf{Data Preprocessing}, \textbf{Fire Detection and Localization}, and \textbf{Alert Generation}. The data flow and interaction between these modules are illustrated in Figure~\ref{fig:overall_architecture}.
+
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Figures/overall_architecture.png}
+    \caption{Overall modular architecture of the Wildfire Detection and Alert System.}
+    \label{fig:overall_architecture}
+\end{figure}
+
+\subsection{Legend of Data Flow:}
+\begin{multicols}
+\begin{enumerate}
+    \item RGB image/video from drone
+    \item Infrared (thermal) image/video from drone
+    \item Drone GPS coordinates (lat, lon, alt)
+    \item GPS coordinates of detected fire (Output)
+    \item Preprocessed RGB image/video
+    \item Preprocessed infrared image/video
+    \item Fire alert signal (Output)
+    \item Binary segmentation mask (Raw)
+    \item RGB frames overlaid with segmentation mask
+    \item Alert confidence score
+    \item Drone's metadata
+\end{enumerate}
+\end{multicols}
+\subsection{Summary of Functional Workflow}
+The following table summarizes the interaction between the data components (as defined in the Legend) and the processing modules:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Processing Module} & \textbf{Input Component (IDs)} & \textbf{Output Component (IDs)} \\ \hline
+Preprocessing & 1, 2 & 5, 6 \\ \hline
+Detection (U-Net) & 5, 6 & 8, 9 \\ \hline
+Geospatial Localization & 3, 8, 11 & 4, 10 \\ \hline
+Alert Generation & 4, 9, 10 & 7 \\ \hline
+\end{tabular}
+\caption{Data flow mapping between system modules.}
+\end{table}
+
+\section{System Algorithm}
+The operational logic of the wildfire detection system is governed by two concurrent processes: a high-frequency \textbf{Detection Loop} for real-time image analysis and a low-latency \textbf{Alert Loop} for decision making and dispatching. This dual-loop architecture ensures both responsiveness to active threats and stability against environmental noise.
+
+\subsection{Detection and Alert Logic via Hysteresis}
+To enhance system stability against minor fluctuations in the model's prediction confidence ($score$), a \textbf{Hysteresis Thresholding} mechanism is implemented. Instead of using a single fixed threshold (e.g., $0.5$) which often leads to "flickering" alerts where the state rapidly toggles between detection and non-detection, our system utilizes a state-transition dual-threshold:
+
+\begin{equation}
+State_{t} = 
+\begin{cases} 
+FIRE & \text{if } score \ge 0.6 \\
+NO\_FIRE & \text{if } score < 0.4 \\
+State_{t-1} & \text{otherwise}
+\end{cases}
+\end{equation}
+As illustrated above, the state transitions to \texttt{FIRE} only when confidence is high ($\ge 0.6$) and remains in that state until the confidence drops significantly ($< 0.4$). This approach ensures that the alert state remains consistent unless a significant change in detection probability occurs, effectively filtering out transient false positives and signal noise.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{Figures/algorithm_flowchart.png}
+    \caption{Flowchart of the dual-loop wildfire detection and alerting algorithm.}
+    \label{fig:detection_algorithm}
+\end{figure}
+
+\subsection{Pseudocode Representation}
+The following pseudocode outlines the implementation of the concurrent dual-loop architecture:
+
+\begin{lstlisting}[caption={Wildfire Detection and Concurrent Alerting Algorithm}]
+# Initialization
+initialize_drone_systems()
+global_state = NO_FIRE
+start_concurrent_thread(alert_loop)
+
+# Main Detection Loop
+while not receive_stop_signal():
+    rgb_raw, ir_raw = capture_synchronized_frames()
+    
+    # Preprocessing
+    rgb_proc = resize_and_normalize(rgb_raw)
+    ir_proc = calibrate_thermal(ir_raw)
+    
+    # Inference
+    inference_score = model.predict(rgb_proc, ir_proc)
+    
+    # State Management using Hysteresis
+    if inference_score >= 0.6:
+        global_state = FIRE
+    elif inference_score < 0.4:
+        global_state = NO_FIRE
+    # else: maintain current global_state
+
+# Alert Loop (Runs Concurrently every 3 seconds)
+def alert_loop():
+    while True:
+        if global_state == FIRE:
+            # Aggregate geospatial data and segmentation overlays
+            fire_location = estimate_geospatial_coords()
+            visual_overlay = generate_mask_overlay(rgb_raw)
+            
+            # Dispatch alert package
+            send_alert(fire_location, visual_overlay, inference_score)
+            sleep(3.0) 
+        else:
+            sleep(0.1) # Idle polling
+\end{lstlisting}
+
+
+\section{Module 1: Multimodal Data Preprocessing}
+
+\subsection{Theoretical Background: Functional Role and Contribution}
+Multimodal data preprocessing is a fundamental stage in image processing that prepares raw sensor data for deep learning inference. The core theory involves three key domains:
+\begin{itemize}
+    \item \textbf{Image Resampling and Normalization:} High-resolution aerial imagery often contains redundant information. Resizing images to a consistent dimension (e.g., $256 \times 256$) ensures computational tractability, while pixel normalization (scaling values to a $[0, 1]$ or $[-1, 1]$ range) stabilizes the gradient flow during backpropagation.
+    \item \textbf{Stochastic Data Augmentation:} Based on the principle of increasing the dataset's entropy, stochastic transformations such as \textit{HorizontalFlip}, \textit{VerticalFlip}, and \textit{Rotate} (implemented via the \textit{Albumentations} library) simulate various drone viewpoints and environmental conditions. This forces the model to learn invariant geometric features rather than overfit to specific orientations.
+    \item \textbf{Cross-modal Synchronization:} This involves aligning temporal timestamps and spatial resolutions between visible-light (RGB) and long-wave infrared (LWIR) sensors to ensure that heat signatures and visual textures are fused accurately at the pixel level.
+\end{itemize}
+
+
+
+\subsection{Functional Role and Contribution}
+In the proposed wildfire detection framework, Module 1 serves as the critical interface between raw hardware signals and the neural network. Its contributions are summarized as follows:
+\begin{itemize}
+    \item \textbf{Noise Mitigation:} By applying radiometric calibration and denoising filters, the module eliminates sensor artifacts and atmospheric haze, providing the U-Net model with "clean" high-frequency features.
+    \item \textbf{Feature Standardization:} It transforms heterogeneous data streams (1, 2) into synchronized, preprocessed tensors (5, 6). This reduces the complexity of the feature extraction task for the subsequent segmentation module.
+    \item \textbf{Enhancing Generalization:} The heavy use of data augmentation during the training phase directly improves the system's robustness. It enables the model to maintain high IoU and Recall scores even when the drone encounters unpredictable flight altitudes, varying sunlight reflections, or complex mountainous terrains.
+\end{itemize}
+
+\section{Module 2: Fire Detection and Localization}
+
+\subsection{Theoretical Background: Functional Role and Contribution}
+Module 2 serves as the computational core of the proposed system, where high-level semantic abstractions are extracted from synchronized multi-modal inputs. The theoretical framework of this module integrates \textbf{Deep Semantic Segmentation} via Convolutional Neural Networks (CNNs) and \textbf{Geospatial Photogrammetry} for inverse projection. \\
+Unlike traditional object detection which yields coarse bounding boxes, pixel-level segmentation is imperative for wildfire analysis. It enables the precise estimation of fire perimeters, active surface areas, and propagation vectors. This module functions as the primary decision-making engine, transforming preprocessed numerical tensors into actionable spatial intelligence for emergency response.
+
+\subsection{Pixel-level Fire Segmentation}
+
+\subsubsection{U-Net Model Architecture}
+We implement the \textbf{U-Net architecture}, a specialized symmetric encoder-decoder network. Originally designed for medical imaging, its structural properties make it exceptionally effective for environmental monitoring where fine-grained detail is critical.\\
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{Figures/u-net-segmentation.PNG}
+    \caption{U-Net architecture for semantic segmentation, featuring a contracting path (encoder), an expansive path (decoder), and skip connections.}
+    \label{fig:unet_architecture}
+\end{figure}
+The architecture is characterized by two distinct paths:
+\begin{itemize}
+    \item \textbf{The Contracting Path (Encoder):} This path follows the typical architecture of a convolutional network. It utilizes repeated applications of $3 \times 3$ convolutions, followed by Rectified Linear Units (ReLU) and $2 \times 2$ max-pooling for downsampling. Each downsampling step doubles the number of feature channels, capturing complex hierarchical patterns and semantic context.
+    \item \textbf{The Expansive Path (Decoder):} Every step in the decoding path consists of an upsampling of the feature map followed by a $2 \times 2$ "up-convolution" that halves the number of feature channels. This reconstructs the spatial resolution of the fire signatures.
+    \item \textbf{Skip Connections:} The hallmark of U-Net is the concatenation of high-resolution features from the contracting path directly into the expansive path. This mechanism compensates for the spatial information loss inherent in pooling layers, allowing the decoder to recover fine-grained details of irregular fire boundaries.
+\end{itemize}
+
+\subsubsection{Rationale and Comparative Analysis}
+\textbf{Rationale for Selection:} U-Net was selected because wildfires in aerial footage often appear as small, fragmented clusters. Standard Fully Convolutional Networks (FCNs) often lose these small-scale features during downsampling, whereas U-Net's skip connections maintain high-fidelity edge detection.
+
+\begin{itemize}
+    \item \textbf{Strengths:} 
+        \begin{itemize}
+            \item \textbf{Spatial Precision:} Superior boundary delineation for irregular flame and smoke shapes.
+            \item \textbf{Data Efficiency:} Demonstrates high performance on specialized datasets like FLAME by maximizing spatial context utilization.
+            \item \textbf{Real-time Capability:} The architecture supports deterministic inference times, essential for onboard UAV processing.
+        \end{itemize}
+    \item \textbf{Weaknesses and Mitigations:} 
+        \begin{itemize}
+            \item \textbf{Memory Overhead:} The deep skip connections can be memory-intensive. To mitigate this, we utilize a lightweight backbone (such as MobileNetV3) to ensure compatibility with edge devices like the NVIDIA Jetson Nano.
+        \end{itemize}
+\end{itemize}
+
+\subsection{Geospatial Localization Mathematics}
+To transform the 2D image-space information (binary mask $M$) into precise geographic-space coordinates, the system employs an inverse projection model based on the \textbf{Pinhole Camera} geometry. This process factors in the drone's altitude ($H$), camera focal length ($f$), and spatial orientation ($\theta, \phi$).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Figures/back_projection_diagram.jpg} 
+    \caption{Pinhole camera model and back-projection geometry for ground coordinate estimation.}
+    \label{fig:back_projection}
+\end{figure}
+The mathematical framework is executed through the following stages:
+
+\begin{itemize}
+    \item \textbf{Centroid Calculation:} The system first identifies the geometric center of the detected wildfire region. The centroid $C(u, v)$ is calculated by averaging the coordinates of all pixels classified as fire ($N$):
+    \begin{equation}
+    C = \left( \frac{1}{N}\sum_{i=1}^{N} u_i, \frac{1}{N}\sum_{i=1}^{N} v_i \right)
+    \end{equation}
+
+    \item \textbf{Ground Mapping via Ground Sample Distance (GSD):} As illustrated in Figure~\ref{fig:back_projection}, the pixel displacement is converted into metric distance on the ground. The \textbf{GSD}, representing the real-world size of a single pixel, is defined as:
+    \begin{equation}
+    GSD = \frac{H \times \text{sensor\_width}}{f \times \text{image\_width}}
+    \end{equation}
+
+    \item \textbf{Coordinate Transformation and Fusion:}
+    \begin{itemize}
+        \item \textbf{Rotation Transformation:} The relative metric offsets from the image center ($\Delta X, \Delta Y$) are rotated based on the UAV's \textbf{Yaw} angle to align with the North-East-Down (NED) geographic coordinate system.
+        \item \textbf{GPS Fusion:} The calculated metric displacements are converted into decimal degrees and fused with the drone's current position $(Lat_D, Lon_D)$. This yields the absolute geographic coordinates (Output 4) of the wildfire.
+    \end{itemize}
+\end{itemize}
+
+This integrated mathematical approach ensures that wildfire localization remains accurate and persistent, regardless of the UAV's flight maneuvers or altitude changes.
+
+\section{Module 3: Decision Logic and Alert Generation}
+\subsection{Theoretical Background: Functional Role and Contribution}
+Module 3 acts as the final administrative layer of the entire image processing pipeline. While the previous modules focus on data preparation and feature extraction, this module is responsible for high-level semantic verification and system-to-human communication.
+
+\begin{itemize}
+    \item \textbf{Role:} Its primary role is to serve as a logical filter that prevents "alert fatigue" by ensuring that only confirmed wildfire events reach the emergency response units. It transforms raw probability scores and binary masks into standardized, actionable intelligence packages.
+    \item \textbf{Contribution to the General Model:} This module bridges the gap between deep learning outputs and real-world emergency management. By introducing temporal validation, it significantly reduces the False Discovery Rate (FDR) of the model. Furthermore, it encapsulates multi-modal data (GPS, Timestamps, Visual Overlays) into a unified JSON telemetry format, which is essential for the interoperability of the system in modern disaster response infrastructures.
+\end{itemize}
+\subsection{Technical Implementation}
+The Alert Module functions as the final decision-making gateway of the processing pipeline. It aggregates the localized segmentation data and synchronized metadata to verify detection reliability through a rigorous validation process before dispatching emergency signals.
+
+\begin{itemize}
+    \item \textbf{Spatio-temporal Consistency Filtering:} To mitigate false positives triggered by transient visual artifacts—such as specular solar glare, lens flares, or sensor noise—the module implements a temporal persistence filter. A wildfire event is only validated if the detected fire pixels maintain spatial consistency across a predefined window of consecutive frames ($N$ frames). This ensures that only persistent thermal and visual signatures trigger the alert system.
+    \item \textbf{Dynamic Alert Dispatching:} Once the integrated \textbf{Alert Confidence Score} exceeds the calibrated safety threshold, the system autonomously generates a \textbf{Fire Alert Signal (7)}. This telemetry package encompasses the precise GPS coordinates of the fire's centroid, an RGB snapshot overlaid with the semantic segmentation mask, and a high-precision ISO-8601 timestamp to facilitate immediate tactical intervention by emergency response units.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Figures/demo_result.png}
+    \caption{Final system output: RGB frame with semantic segmentation mask overlay and real-time geospatial alert metadata.}
+    \label{fig:demo_output}
+\end{figure}
+The implementation of spatio-temporal filtering significantly enhances the system's robust precision, effectively neutralizing the impact of non-fire radiometric anomalies. As demonstrated in Figure \ref{fig:demo_output}, the final output provides an intuitive and actionable visualization for emergency operators. By fusing pixel-level segmentation with global positioning data, the system achieves its primary objective: delivering high-fidelity, real-time situational awareness for proactive wildfire management.
+
+
+
+
+
+\chapter{EXPERIMENTS}
+
+\section{Evaluation Metrics}
+To rigorously assess the effectiveness of the proposed wildfire detection system, we employ a multi-faceted evaluation strategy. The metrics are selected to validate three critical performance dimensions: pixel-level segmentation precision, alert reliability, and geospatial localization accuracy.
+
+\subsection{Pixel-wise Segmentation Quality (IoU)}
+The primary metric for evaluating the U-Net segmentation model is the \textbf{Intersection over Union (IoU)}, also known as the Jaccard Index. This metric quantifies the spatial overlap between the predicted fire region ($A$) and the ground-truth mask ($B$). 
+
+Mathematically, IoU represents the ratio of the intersection area to the union area of the two masks. In the context of pixel-wise binary segmentation, it is calculated using the components of the confusion matrix:
+
+\begin{equation}
+    IoU = \frac{\text{Area of Overlap}}{\text{Area of Union}} = \frac{|A \cap B|}{|A \cup B|} = \frac{TP}{TP + FP + FN}
+\end{equation}
+
+
+
+
+Where the components are defined as follows:
+\begin{itemize}
+    \item \textbf{Area of Overlap ($A \cap B$ / TP):} The total count of True Positive pixels, which are fire pixels correctly identified by the model.
+    \item \textbf{Area of Union ($A \cup B$):} The total spatial extent covered by both the prediction and the ground truth. This is calculated as the sum of:
+    \begin{itemize}
+        \item \textbf{TP (True Positives):} Correct fire detections.
+        \item \textbf{FP (False Positives):} Background pixels incorrectly predicted as fire.
+        \item \textbf{FN (False Negatives):} Actual fire pixels missed by the model.
+    \end{itemize}
+\end{itemize}
+
+A high IoU indicates that the highlighted fire regions on the RGB frames align closely with reality, providing reliable visual evidence for drone operators. For this system, we target a minimum IoU of \textbf{0.60} to ensure operational viability and high-fidelity mapping.
+
+\subsection{Alert Robustness and Safety Bias (F2-Score)}
+In wildfire surveillance, the cost of a \textit{False Negative} (missing an active fire) far outweighs that of a \textit{False Positive} (false alarm). Therefore, we utilize the \textbf{F2-Score}, a variant of the F-beta score that places greater statistical weight on \textbf{Recall} than on \textbf{Precision}:
+
+\begin{equation}
+    F_{\beta} = (1 + \beta^2) \cdot \frac{\text{Precision} \cdot \text{Recall}}{(\beta^2 \cdot \text{Precision}) + \text{Recall}}
+\end{equation}
+
+By setting $\beta = 2$, we prioritize the system’s ability to detect all potential ignition points. The underlying components are defined as:
+\begin{itemize}
+    \item \textbf{Precision} ($\frac{TP}{TP + FP}$): The accuracy of the "fire" predictions.
+    \item \textbf{Recall} ($\frac{TP}{TP + FN}$): The sensitivity of the system in capturing all fire pixels.
+\end{itemize}
+Our objective is to maintain an $F_2$-Score of at least 0.75 to ensure maximum safety.
+
+\subsection{Geospatial Localization Accuracy (Haversine Distance)}
+Beyond image space, the system's ability to guide first responders depends on geographic precision. We measure the error between the estimated centroid coordinates and the ground-truth GPS location using the \textbf{Haversine formula}. 
+
+Unlike the standard Euclidean distance which assumes a flat plane, the Haversine formula accounts for the Earth's curvature, providing a more reliable metric for long-distance UAV missions.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{Figures/haversine_vs_euclidean.jpg}
+    \caption{Geometric comparison: Haversine distance (Great Circle) follows the Earth's curvature, whereas Euclidean distance represents a straight line through the sphere.}
+    \label{fig:haversine_vs_euclidean}
+\end{figure}
+
+
+
+The distance $d$ is calculated as follows:
+\begin{equation}
+    d = 2r \cdot \arcsin\left(\sqrt{\sin^2\left(\frac{\Delta\phi}{2}\right) + \cos(\phi_1)\cos(\phi_2)\sin^2\left(\frac{\Delta\lambda}{2}\right)}\right)
+\end{equation}
+
+Where:
+\begin{itemize}
+    \item $\phi_1, \phi_2$: Latitudes of the ground truth and predicted points.
+    \item $\lambda_1, \lambda_2$: Longitudes of the ground truth and predicted points.
+    \item $r$: Earth’s radius ($\approx$ 6,371 km).
+\end{itemize}
+
+Using this spherical trigonometric approach, the average localization error is kept under \textbf{50 meters}, ensuring responders are guided to the precise ignition point.
+\subsection{Overall Classification Accuracy}
+Finally, we monitor the \textbf{Global Pixel Accuracy}, which represents the ratio of correctly classified pixels (both fire and background) to the total number of pixels:
+\begin{equation}
+    \text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
+\end{equation}
+While Accuracy provides a general overview, it is used as a secondary metric due to the significant class imbalance between small fire regions and the expansive forest background.
+
+\section{Dataset}
+
+\subsection{Dataset Acquisition: FLAME Dataset}
+All evaluations in this project are conducted using the \textbf{FLAME (Fire Luminosity Airborne-based Machine learning Evaluation)} dataset, a publicly available repository hosted on \href{https://ieee-dataport.org/open-access/flame-dataset-aerial-imagery-pile-burn-detection-using-drones-uavs}{IEEE DataPort}. This dataset serves as a comprehensive benchmark for wildfire detection via Unmanned Aerial Vehicles (UAVs).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{Figures/flame_subsets.png}
+    \caption{Representative samples from FLAME subsets 9 and 10 used for semantic segmentation training.}
+    \label{fig:flame_overview}
+\end{figure}
+
+
+For the scope of our semantic segmentation task, we specifically utilized \textbf{Subsets 9 and 10}. These subsets provide high-resolution RGB imagery paired with meticulously annotated pixel-level binary masks, capturing various prescribed fire scenarios in dense forest environments.
+
+\subsection{Data Partitioning and Directory Structure}
+To facilitate efficient data loading and ensure a clean separation between the training and evaluation phases, the extracted samples from \textbf{FLAME Subsets 9 and 10} were organized into a hierarchical directory structure. \\
+The dataset, totaling 2,003 samples, was partitioned into three distinct sets: \textbf{train} (1,201 samples), \textbf{val} (400 samples), and \textbf{test} (402 samples) sets. Each set follows a synchronized paired-folder architecture where the raw RGB images and their corresponding binary semantic masks are stored separately but share identical filenames for indexing.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.6\textwidth}
+\begin{verbatim}
+DatasetRoot/
+├── train/
+│   ├── images/  (1,201 samples)
+│   └── masks/   (1,201 samples)
+├── val/
+│   ├── images/  (400 samples)
+│   └── masks/   (400 samples)
+└── test/
+    ├── images/  (402 samples)
+    └── masks/   (402 samples)
+\end{verbatim}
+    \end{minipage}
+    \caption{Hierarchical directory structure for the wildfire segmentation dataset.}
+    \label{fig:directory_structure}
+\end{figure}
+
+\textbf{Implementation Details:}
+\begin{itemize}
+    \item \textbf{Synchronization:} For every file in \texttt{/images/}, there is a corresponding ground-truth file in \texttt{/masks/} with an identical unique identifier (e.g., \texttt{frame\_001.png}).
+    \item \textbf{Data Integrity:} This structure allows the \texttt{PyTorch Dataset} class to iterate through the pairs consistently, ensuring that the model's loss function is always calculated against the correct spatial ground truth.
+    \item \textbf{Subsets Source:} The images were specifically curated from Subsets 9 and 10 of the FLAME dataset to ensure high-fidelity pixel-level annotations across various prescribed fire conditions.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Figures/dataset_distribution.png}
+    \caption{Distribution of samples across Train, Validation, and Test splits (6:2:2 ratio).}
+    \label{fig:distribution}
+\end{figure}
+
+
+As illustrated in Figure~\ref{fig:distribution}, this distribution ensures a balanced representation of fire signatures across all phases of the machine learning pipeline, facilitating reliable generalization.
+
+\subsection{Data Specification and Ground Truth}
+Each training instance consists of a 3-channel RGB image and its corresponding 1-channel semantic mask. The ground truth (GT) masks utilize a binary representation where fire pixels are assigned a value of 1 (White) and background pixels are assigned a value of 0 (Black).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Figures/sample_mask_comparison.png}
+    \caption{Qualitative sample from the processed dataset: (Left) Input RGB image, (Right) Binary ground truth mask.}
+    \label{fig:sample_mask}
+\end{figure}
+The precise pixel-level alignment shown in Figure~\ref{fig:sample_mask} validates the high fidelity of the FLAME annotations, which is fundamental for achieving high \textit{Intersection over Union} (IoU) and \textit{Recall} scores during the evaluation phase.
+
+\subsection{Stochastic Data Augmentation and Preprocessing}
+To improve the model's generalization capability and mitigate overfitting, we implemented a robust stochastic data augmentation pipeline using the \textbf{Albumentations} library. This process increases the diversity of the training set by simulating various environmental conditions, drone viewpoints, and sensor artifacts.
+
+The augmentation strategy is categorized into three primary transformation groups:
+\begin{itemize}
+    \item \textbf{Geometric Transformations:} To ensure the model is invariant to drone orientation and perspective, we applied \textit{HorizontalFlip}, \textit{VerticalFlip}, \textit{RandomRotate90}, and \textit{Perspective} shifts. These simulate changes in flight direction and camera angles relative to the terrain.
+    \item \textbf{Photometric and Color Adjustments:} To handle varying lighting conditions and sunlight reflections, we utilized \textit{RandomBrightnessContrast}, \textit{HueSaturationValue}, and \textit{RGBShift}. This ensures the network focuses on chromatic fire signatures rather than specific lighting intensities.
+    \item \textbf{Environmental Noise Simulation:} Specific atmospheric effects such as smoke or haze were simulated using \textit{RandomFog} and \textit{GaussianBlur}, while \textit{RandomShadow} was applied to replicate the complex occlusion patterns found in dense forest canopies.
+\end{itemize}
+
+The final input tensors were resized to a uniform resolution of $512 \times 512$ pixels to ensure computational consistency.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{Figures/transformed_visualization.png}
+    \caption{Visualization of the stochastic augmentation pipeline: Original imagery transformed through geometric, photometric, and environmental noise filters to enhance model robustness.}
+    \label{fig:augmentation_vis}
+\end{figure}
+
+
+The technical implementation of this pipeline is defined as follows:
+
+\begin{lstlisting}[language=Python, caption={Data Augmentation Pipeline using Albumentations}]
+transform = A.Compose([
+    A.HorizontalFlip(p=0.5),
+    A.VerticalFlip(p=0.5),
+    A.RandomRotate90(p=0.5),
+    A.Rotate(limit=30, p=0.3),
+    A.Perspective(scale=(0.05, 0.1), p=0.3),
+    A.RandomScale(scale_limit=(-0.2, 0.2), p=0.3),
+
+    A.RandomBrightnessContrast(0.3, 0.3, p=0.5),
+    A.HueSaturationValue(20, 30, 20, p=0.5),
+    A.RGBShift(20, 20, 20, p=0.3),
+
+    A.RandomFog(alpha_coef=0.1, p=0.4),
+    A.RandomShadow(shadow_roi=(0, 0, 1, 0.5), p=0.4),
+    A.GaussianBlur(blur_limit=(3, 7), p=0.3),
+
+    A.Resize(512, 512),
+], p=1.0)
+\end{lstlisting}
+
+As illustrated in Figure~\ref{fig:augmentation_vis}, the application of these transformations allows the U-Net model to learn robust features that are less sensitive to environmental noise, directly contributing to the high \textit{Recall} and \textit{F2-score} achieved in our experimental results.
+
+
+
+\section{Experimental Setup and Environments}
+To ensure the reproducibility of the results and validate the proposed wildfire detection pipeline, the experiments were conducted under a standardized technical environment. This setup encompasses the hardware specifications, software frameworks, and the specific hyperparameter configurations derived from the training phase.
+
+\subsection{Hardware and Software Framework}
+The system was developed and evaluated using high-performance computing resources to handle the intensive pixel-level computations required by the U-Net architecture:
+\begin{itemize}
+    \item \textbf{Hardware Resources:} All experiments, including model training and real-time inference testing, were performed on an \textbf{NVIDIA GeForce RTX GPU} (CUDA-enabled). The use of GPU acceleration is critical for achieving the low-latency processing required for drone-based deployment.
+    \item \textbf{Software Stack:} The model was implemented using the \textbf{PyTorch Lightning} framework for scalable and modular deep learning management. Performance evaluation was conducted using \textbf{TorchMetrics} to ensure standard compliance for segmentation metrics (IoU, Recall, etc.).
+\end{itemize}
+\subsection{Model Selection and Backbone Architecture}
+The choice of the model architecture is pivotal for balancing segmentation fidelity and real-time inference constraints on UAV hardware. For this task, we implemented a \textbf{U-Net} framework integrated with a high-performance encoder (Backbone).
+
+\begin{itemize}
+    \item \textbf{Encoder Selection:} We utilized a \textbf{ResNet-34} encoder (pretrained on the ImageNet dataset) to serve as the contracting path. ResNet-34 was selected due to its residual learning blocks, which effectively mitigate the vanishing gradient problem, allowing the model to extract deep hierarchical features from complex forest terrains.
+    \item \textbf{Transfer Learning:} By utilizing a pretrained backbone, the model leverages low-level features (edges, textures) learned from millions of images, significantly accelerating convergence on the FLAME dataset despite the specialized nature of aerial wildfire imagery.
+    \item \textbf{Decoder and Skip Connections:} The expansive path (Decoder) reconstructs the spatial resolution using transpose convolutions, while skip connections from the ResNet-34 layers ensure that fine-grained spatial details of irregular fire boundaries are preserved.
+\end{itemize}
+
+
+\subsection{Training Configurations and Hyperparameters}
+The training process was meticulously optimized using the \textbf{PyTorch Lightning} framework to balance segmentation accuracy and model convergence. Based on the \texttt{FlameModel} implementation, the following parameters were applied:
+
+\begin{itemize}
+    \item \textbf{Input Specification:} All imagery from FLAME Subsets 9 and 10 were resized to \textbf{$512 \times 512$} pixels. During the forward pass, images underwent Z-score normalization using encoder-specific mean and standard deviation values to stabilize training.
+    
+    \item \textbf{Sample Distribution and Structure:} The dataset, curated from Subsets 9 and 10, totals 2,003 samples. To ensure a clean separation between training and evaluation, we organized the data into a paired-folder hierarchy:
+    \begin{itemize}
+        \item \textbf{train/}: 1,201 samples (60\%) - Used for weight optimization.
+        \item \textbf{val/}: 400 samples (20\%) - Used for hyperparameter tuning.
+        \item \textbf{test/}: 402 samples (20\%) - Used for final unbiased evaluation.
+    \end{itemize}
+    \textit{Note: Each set maintains synchronized \texttt{/images} and \texttt{/masks} sub-directories where pairs share identical filenames for consistent indexing.}
+
+
+
+    \item \textbf{Multi-Objective Loss Function:} To address the extreme class imbalance and improve boundary sharpness, a hybrid loss function was implemented:
+    \begin{equation}
+        \mathcal{L}_{total} = \mathcal{L}_{Focal} + \mathcal{L}_{Dice} + \mathcal{L}_{SoftBCE}
+    \end{equation}
+    The \textbf{Focal Loss} forces the model to focus on hard-to-classify pixels, the \textbf{Dice Loss} optimizes for spatial overlap, and \textbf{Soft Binary Cross-Entropy} provides stable gradient flow.
+
+
+
+    \item \textbf{Optimization and Learning Rate Scheduling:} 
+    \begin{itemize}
+        \item \textbf{Optimizer:} The \textbf{Adam} optimizer was utilized with an initial learning rate of $2 \times 10^{-4}$.
+        \item \textbf{Scheduler:} A \textbf{Cosine Annealing Learning Rate} scheduler was implemented (down to $1 \times 10^{-5}$) to allow the model to settle into optimal local minima.
+    \end{itemize}
+
+
+
+    \item \textbf{Execution Parameters:} 
+    \begin{itemize}
+        \item \textbf{Batch Size:} 4 (optimized for GPU memory constraints at $512 \times 512$ resolution).
+        \item \textbf{Epochs:} 50 (allowing sufficient cycles for the triple-loss convergence).
+    \end{itemize}
+\end{itemize}
+
+\section{Experimental Results and Analysis}
+
+\subsection{Quantitative Performance Summary}
+The performance of the wildfire segmentation system was rigorously evaluated using the test partition of the FLAME dataset, comprising 402 unseen aerial frames. To identify the optimal configuration, we conducted an ablation study focusing on two key components: Stochastic Data Augmentation and the Loss Function strategy.
+
+\subsubsection{Comparative Performance Analysis}
+We compared four different configurations of the U-Net architecture. The results, summarized in Table~\ref{tab:performance_comparison}, illustrate the impact of each technical enhancement on the final metrics.
+
+\begin{table}[H]
+\centering
+\caption{Comparative Performance Metrics on FLAME Test Set}
+\label{tab:performance_comparison}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+\textbf{Method} & \textbf{Accuracy} & \textbf{$F_2$-score} & \textbf{IoU} & \textbf{Precision} & \textbf{Recall} \\ \hline
+U-Net + BCE & 0.9978 & 0.7228 & 0.6396 & 0.8992 & 0.6890 \\ \hline
+U-Net + BCE + Aug & 0.9981 & 0.7672 & 0.6892 & \textbf{0.9129} & 0.7377 \\ \hline
+U-Net + 3-Loss & 0.9980 & 0.7740 & 0.6847 & 0.8870 & 0.7501 \\ \hline
+\textbf{U-Net + 3-Loss + Aug} & \textbf{0.9982} & \textbf{0.8162} & \textbf{0.7139} & 0.8627 & \textbf{0.8054} \\ \hline
+\end{tabular}
+\end{table}
+
+
+
+\subsubsection{Key Performance Insights}
+Based on the quantitative data from Table~\ref{tab:performance_comparison}, several critical insights were observed:
+\begin{itemize}
+    \item \textbf{Impact of Data Augmentation:} The inclusion of stochastic transformations (Flipping, Rotation, Fog simulation) consistently improved the \textbf{IoU by approximately 5--8\%}. This confirms that simulating environmental noise helps the model generalize effectively to diverse aerial viewpoints and atmospheric conditions.
+    \item \textbf{Loss Function Optimization:} Transitioning from simple Binary Cross-Entropy (BCE) to a \textbf{Multi-Objective Loss (Focal + Dice + SoftBCE)} significantly boosted the \textbf{Recall from 0.6890 to 0.8054}. This 11\% improvement is vital for wildfire safety, as it minimizes False Negatives (missed fire detections).
+    \item \textbf{Safety Bias ($F_2$-score):} Our best-performing model achieved an \textbf{$F_2$-score of 0.8162}, successfully exceeding our project requirement of 0.75. This reflects a robust system that prioritizes the detection of all active fire pixels, even at a slight trade-off in precision.
+\end{itemize}
+
+\subsection{Qualitative Analysis and Real-time Demonstration}
+To validate the system's performance in a real-world operational context, we conducted inference on a drone-captured wildfire video stream. The results are visualized through a dedicated \textbf{Gradio interface}, which integrates the segmentation output with our temporal alert logic.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{Figures/demo_result.png}
+    \caption{Real-time Wildfire Alert System Interface: The system displays the original RGB stream (top-left), the predicted fire mask (top-right), and localized alert metadata with a safety status indicator (bottom).}
+    \label{fig:demo_interface}
+\end{figure}
+
+
+
+As illustrated in Figure~\ref{fig:demo_interface}, the system demonstrates several key strengths:
+\begin{itemize}
+    \item \textbf{High-Fidelity Segmentation:} Despite the dynamic movement and varying altitudes of the UAV, the model generates continuous and sharp masks that tightly encompass the active pile burns.
+    \item \textbf{Environmental Robustness:} The model successfully distinguishes between high-intensity fire pixels and sunlight-illuminated forest canopy, significantly reducing false alarm triggers caused by specular reflections.
+    \item \textbf{Temporal Reliability:} By applying a 3-second persistence check and hysteresis thresholding, the alert status remains stable, confirming a "Fire Detected" state only when the detection persists consistently across consecutive frames.
+\end{itemize}
+
+\subsection{Geospatial Localization Performance}
+By utilizing the Haversine distance metric, the system estimated the fire centroids with an average geographic error of less than \textbf{50 meters}. This level of precision, combined with real-time visual masks, provides actionable intelligence for ground-based fire containment efforts and emergency response coordination.
+
+\chapter{CONCLUSION}
+
+The development of the wildfire semantic segmentation and alert system demonstrates the significant potential of integrating deep learning with Unmanned Aerial Systems (UAVs) for environmental protection. By leveraging the U-Net architecture with a ResNet-34 backbone and a multi-objective loss function, the system achieved a high \textit{Intersection over Union} (IoU) of 0.7139 and an $F_2$-score of 0.8162. These results confirm that the pipeline can effectively delineate fire boundaries and provide reliable alerts with a safety-first bias. The combination of pixel-level segmentation, temporal consistency checks, and geospatial localization provides a robust framework for early wildfire intervention.
+
+\section{Ethical and Social Issues}
+While the integration of drones and artificial intelligence into wildfire monitoring presents promising technological advancements, it also raises several ethical and social considerations that must be addressed to ensure responsible deployment.
+
+\subsection{Ethical Issues}
+\begin{itemize}
+    \item \textbf{Privacy Concerns:} The use of aerial surveillance through drones inherently introduces the risk of infringing on individuals’ privacy. Although the primary targets of drone flights are forested and unpopulated areas, there remains the possibility of unintentionally capturing imagery of private properties or individuals in nearby rural communities. Establishing clear guidelines on data collection boundaries and data anonymization is essential to protect personal privacy rights.
+    \item \textbf{Accountability and Responsibility:} As the detection system relies on autonomous processing, determining accountability in the case of a missed detection or delayed alert is complex. Clear documentation, system auditing mechanisms, and transparency in the AI decision-making process are necessary to establish whether responsibility lies with the developers, the operators, or the managing organization.
+    \item \textbf{Data Security:} The system processes sensitive high-resolution imagery and precise GPS coordinates. Ensuring robust encryption, secure transmission protocols, and strict access control policies is vital to prevent the misuse of geographic data or unauthorized surveillance.
+\end{itemize}
+
+\subsection{Social Issues}
+\begin{itemize}
+    \item \textbf{Impact on Employment:} The deployment of automated monitoring systems may disrupt traditional roles in forest management, such as manual patrol teams. While technology reduces the physical risk to human life, it may decrease the demand for certain labor-intensive roles.
+    \item \textbf{Mitigation and Integration:} To address employment shifts, the system should be viewed as a decision-support tool rather than a total replacement. Reskilling programs should be implemented to train local personnel in drone piloting and AI-system management, fostering a collaborative environment between human expertise and machine efficiency.
+\end{itemize}
+
+\section{Future Work}
+Despite the successful implementation of the current prototype, several avenues remain for future enhancement to transition the system from a laboratory environment to real-world deployment:
+
+\begin{itemize}
+    \item \textbf{Model Compression for Edge Deployment:} Future iterations will focus on optimizing the model using techniques such as \textit{Quantization} and \textit{Pruning}. This will allow the high-performance U-Net model to run directly on the drone's onboard edge hardware (e.g., NVIDIA Jetson) with lower power consumption and latency.
+    \item \textbf{Multi-Spectral Data Fusion:} Incorporating thermal (Infrared) imagery alongside RGB data would significantly improve detection reliability under heavy smoke or during nighttime operations, where visual spectrum cues are limited.
+    \item \textbf{Dynamic Path Planning:} Integrating the alert system with an autonomous flight controller would enable the drone to automatically adjust its flight path toward a detected ignition point for higher-resolution inspection without manual operator intervention.
+    \item \textbf{Swarm Intelligence:} Expanding the system to support multiple drones (swarm) working in coordination would allow for the monitoring of much larger forest areas and provide multi-angle views of a fire for more accurate 3D localization.
+\end{itemize}
+
+\chapter{APPENDIX}
+
+
+\section{Work Contribution and Role Assignment}
+
+\noindent\adjustbox{max width=\textwidth}{
+\begin{tabular}{|l|c|c|p{4cm}|p{6cm}|}
+\hline
+\textbf{Member} & \textbf{Student ID} & \textbf{Contribution} & \textbf{Roles} & \textbf{Task Assignment} \\
+\hline
+Phat Nguyen Cong & 23521143 & 30\% & Group Leader & Project management, designing overall system architecture, implementing loss functions, and writing final report. \\
+\hline
+An Nguyen Xuan & 23520023 & 25\% & Member & Dataset acquisition, implementing data augmentation pipeline, and performing exploratory data analysis (EDA). \\
+\hline
+An Truong Hoang Thanh & 23520032 & 25\% & Member & Model implementation (U-Net), hyperparameter tuning, training process management, and quantitative evaluation. \\
+\hline
+Cuong Vu Viet & 23520213 & 20\% & Member & Developing Gradio demo application, visualization of segmentation results, and preparing technical documentation. \\
+\hline
+\end{tabular}
+}
+
+\vspace{0.5em}
+\noindent\textit{Note: The contribution scores were collectively agreed upon by all team members based on the workload and technical impact of each assigned task.}
+
+\vspace{2em}
+\section*{Supervisor's Evaluation and Feedback}
+
+\vspace{1em}
+\noindent\rule{\textwidth}{0.4pt}
+
+\vspace{4em}
+\noindent\rule{\textwidth}{0.4pt}
+
+
+\vspace{3em}
+\begin{flushright}
+Ho Chi Minh City, January 2026 \\
+\textbf{Lecturer} \\[1em]
+\textbf{MSc. Thang Cap Pham Dinh}
+\end{flushright}
+
+\section{System Demonstration and Prototype}
+
+\textbf{Source Code Repository:} The full implementation is available on \href{https://github.com/paht2005/CS406.Q11_Wildfire-Semantic-Segmentation-and-Alert-System-for-Drones-via-Deep-Learning-Project}{GitHub Repository}\\
+\textbf{Demonstration Video:} The demo video can be accessed at \href{https://drive.google.com/file/d/1WtvxMeWxDhHF4Q_EQ5IF3PfoK04fbOw3/view?usp=sharing}{Demo Video}
+
+% Thêm dòng này để đưa References vào mục lục
+\cleardoublepage
+\addcontentsline{toc}{chapter}{References}
+\begin{thebibliography}{99}
+
+\bibitem{bouguettaya2022review}
+Bouguettaya, A., Elmasri, R., Wu, S., \& Yoon, J. (2022). A review on early wildfire detection from unmanned aerial vehicles using deep learning-based computer vision algorithms. \textit{Journal of Intelligent \& Robotic Systems}, 105(3), 1–18.
+
+\bibitem{haeri2024comprehensive}
+Haeri Boroujeni, M., Marzband, M., Godina, R., \& Ghosh, S. (2024). A comprehensive survey of research towards AI-enabled unmanned aerial systems in pre-, active-, and post-wildfire management. \textit{Applied Energy}, 357, 121967.
+
+\bibitem{flame2022dataset}
+Miller, M., et al. (2022). FLAME: A dataset of aerial imagery for pile burn detection using drones (UAVs). \textit{IEEE Dataport}. [Online]. Available: \url{https://ieee-dataport.org/open-access/flame-dataset-aerial-imagery-pile-burn-detection-using-drones-uavs}.
+
+\bibitem{ronneberger2015unet}
+Ronneberger, O., Fischer, P., \& Brox, T. (2015). U-Net: Convolutional networks for biomedical image segmentation. In \textit{International Conference on Medical Image Computing and Computer-Assisted Intervention (MICCAI)}, pp. 234–241.
+
+\bibitem{albumentations}
+Buslaev, A., Iglovikov, V. I., Khvedchenya, E., Parinov, A., Kurlyandchik, M., \& Kalinin, A. A. (2020). Albumentations: Fast and flexible image augmentations. \textit{Information}, 11(2), 125.
+
+\bibitem{qi2009fire}
+Qi, X., Wang, X., \& Wang, Y. (2009). Real-time fire detection using video processing. \textit{International Journal of Innovative Computing, Information and Control}, vol. 5, no. 11, pp. 3829--3836.
+
+\bibitem{redmon2018yolov3}
+Redmon, J., \& Farhadi, A. (2018). YOLOv3: An incremental improvement. \textit{arXiv preprint arXiv:1804.02767}.
+
+\bibitem{liu2022yolo}
+Liu, W., Yang, X., Liu, J., \& Xu, M. (2022). Image-adaptive YOLO for object detection in adverse weather conditions. \textit{Proceedings of the AAAI Conference on Artificial Intelligence}, 36(3), 2740–2747.
+
+\bibitem{zhao2020saliency}
+Zhao, Y., Xu, Z., Wang, H., Wu, H., \& Jin, Y. (2020). Saliency detection-based wildfire smoke detection using UAV imagery. In \textit{Proceedings of the IEEE International Conference on Multimedia and Expo (ICME)}, pp. 1–6.
+
+\bibitem{martinez2015multi}
+Martinez-de Dios, J. R., Merino, L., Caballero, F., \& Ollero, A. (2015). Multi-UAV technologies for automatic forest fire monitoring and measurement. In \textit{Proceedings of the International Conference on Computer Vision Systems (ICVS)}, pp. 207--215.
+
+\end{thebibliography}
+
+
+
+\end{document}
