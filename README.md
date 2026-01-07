@@ -145,12 +145,14 @@ The framework is decomposed into three primary functional modules: **Data Prepro
 
 
 <p align="center">
-  <img src="docs/figs/u-net-segmentation.png" alt="U-Net Architecture" width="850">
+  <img src="docs/figs/u-net-segmentation.jpg" alt="U-Net Architecture" width="850">
 </p>
 
 * **Multi-Objective Loss Function**: To address the extreme class imbalance inherent in wildfire imagery, we adopted a composite loss function:
-  $$\mathcal{L}_{total} = \lambda_1 \mathcal{L}_{Focal} + \lambda_2 \mathcal{L}_{Dice} + \lambda_3 \mathcal{L}_{SoftBCE}$$
-  This approach optimizes both pixel-wise accuracy and region overlap while stabilizing the training process.
+
+```math
+\mathcal{L}_{total} = \lambda_1 \mathcal{L}_{Focal} + \lambda_2 \mathcal{L}_{Dice} + \lambda_3 \mathcal{L}_{SoftBCE}
+```
 
 ### **3. Data Augmentation & Feature Resilience**
 To ensure the model remains invariant to drone movement and environmental changes, we apply a robust stochastic augmentation pipeline via the **Albumentations** library:
