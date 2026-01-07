@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://www.uit.edu.vn/" title="University of Information Technology">
-    <img src="https://i.imgur.com/WmMnSRt.png" alt="University of Information Technology (UIT)" width="80">
+    <img src="https://i.imgur.com/WmMnSRt.png" alt="University of Information Technology (UIT)" width="400">
   </a>
 </p>
 
