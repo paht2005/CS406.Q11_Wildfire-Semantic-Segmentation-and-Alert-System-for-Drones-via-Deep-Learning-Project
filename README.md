@@ -1,10 +1,15 @@
 <p align="center">
   <a href="https://www.uit.edu.vn/" title="University of Information Technology">
-    <img src="https://i.imgur.com/WmMnSRt.png" alt="University of Information Technology (UIT)">
+    <img src="https://i.imgur.com/WmMnSRt.png" alt="University of Information Technology (UIT)" width="80">
   </a>
 </p>
 
 <h1 align="center"><b>CS406.Q11 – Image Processing and Applications</b></h1>
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.9+-blue?style=for-the-badge&logo=python&logoColor=white" />
+  <img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white" />
+  <img src="https://img.shields.io/badge/Gradio-FFBB00?style=for-the-badge&logo=gradio&logoColor=black" />
+</p>
 
 ---
 # **CS406 Course Project: Wildfire Semantic Segmentation and Alert System for UAVs/Drones via Deep Learning**
