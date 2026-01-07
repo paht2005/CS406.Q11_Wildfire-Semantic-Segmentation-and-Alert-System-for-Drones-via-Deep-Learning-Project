@@ -131,25 +131,60 @@ CS406.Q11_Wildfire-Semantic-Segmentation-and-Alert-System-for-Drones-via-Deep-Le
 
 The system follows a modular pipeline designed through computational thinking principles (Abstraction, Decomposition, and Pattern Recognition) to transform raw sensor data into actionable wildfire alerts.
 
-### **1. Semantic Segmentation Architecture**
-- **Core Model**: The system utilizes a **U-Net** architecture, a premier choice for biomedical and environmental image segmentation due to its symmetrical encoder-decoder structure.
-- **Encoders**: We implemented **ResNet34** and **ResNet50** backbones to leverage deep residual learning, enhancing feature extraction from complex forest textures.
-- **Loss Functions**: To address the class imbalance inherent in wildfire imagery (where fire pixels occupy a small fraction of the frame), we experimented with **Binary Cross-Entropy (BCE)** and a **Composite 3-Loss function** (BCE + Dice Loss + IoU Loss) to optimize both pixel-wise accuracy and region overlap.
+### **1. Overall Architecture**
+The framework is decomposed into three primary functional modules: **Data Preprocessing**, **Fire Detection and Localization**, and **Alert Generation**. This modular architecture ensures efficient data flow from raw inputs to finalized telemetry outputs.
 
-### **2. Multi-Modal Feature Recognition**
-The model is trained to recognize distinct wildfire patterns across two spectrums:
-* **RGB Visual Cues**: Identifying irregular, high-intensity color clusters (red, orange, yellow) and the soft-edged, upward-moving cloud textures characteristic of smoke.
-* **Thermal Signatures**: Detecting localized "heat blobs" or saturated spots that represent physical temperature anomalies, allowing the system to filter out visual artifacts like sunlight glare or lens flare.
+<p align="center">
+  <img src="docs/figs/overall_architecture.png" alt="Overall Architecture" width="850">
+</p>
 
-### **3. Temporal Consistency & Alert Logic**
-To ensure high reliability and minimize false positives in live video streams, we implemented a temporal validation loop:
-* **Hysteresis Thresholding**: Instead of a single static threshold, the system uses dual-score thresholds:
-    * **EVENT_ON ($\ge 0.6$)**: Triggers the **FIRE** state.
-    * **EVENT_OFF ($< 0.4$)**: Resets the system to **NO_FIRE**.
-* **Persistence Analysis**: A fire alert is only issued if the detection persists across consecutive frames within a 3-second check interval, ensuring that transient glares are ignored.
+### **2. Semantic Segmentation Architecture**
+* **Core Model**: The system utilizes a **U-Net** architecture, featuring a symmetrical contracting path (encoder) for context and an expansive path (decoder) for precise pixel-level localization.
+* **Encoder Backbones**: We implemented **ResNet-34** and **ResNet-50** backbones to leverage deep residual learning, enhancing feature extraction from complex forest textures.
 
-### **4. Geospatial Localization**
-For every detected fire region, the system calculates the geometric centroid of the segmentation mask. By fusing the drone's real-time **GPS coordinates** (latitude, longitude, altitude) with camera orientation metadata (yaw, pitch, roll), the system estimates the ground-truth coordinates of the fire using the **Haversine formula**.
+
+
+<p align="center">
+  <img src="docs/figs/u-net-segmentation.jpg" alt="U-Net Architecture" width="850">
+</p>
+
+* **Multi-Objective Loss Function**: To address the extreme class imbalance inherent in wildfire imagery, we adopted a composite loss function:
+  $$\mathcal{L}_{total} = \lambda_1 \mathcal{L}_{Focal} + \lambda_2 \mathcal{L}_{Dice} + \lambda_3 \mathcal{L}_{SoftBCE}$$
+  This approach optimizes both pixel-wise accuracy and region overlap while stabilizing the training process.
+
+### **3. Data Augmentation & Feature Resilience**
+To ensure the model remains invariant to drone movement and environmental changes, we apply a robust stochastic augmentation pipeline via the **Albumentations** library:
+* **Geometric Invariance**: Horizontal/Vertical flips, rotations, and perspective shifts simulate various drone headings and camera angles.
+* **Environmental Noise**: Gaussian blur, random fog, and shadow simulation prepare the model for adverse atmospheric conditions and smoke occlusions.
+
+<p align="center">
+  <img src="docs/figs/transformed_visualization.png" alt="Augmentation Pipeline" width="850">
+</p>
+
+### **4. Temporal Consistency & Alert Logic**
+To minimize false positives in live video streams, we implemented a dual-loop logic with **Hysteresis Thresholding**:
+* **Detection Loop**: Continuously calculates an **Alert Score** based on the segmented fire area, model probability, and temporal persistence.
+* **Hysteresis Logic**: 
+  * **EVENT_ON ($\ge 0.6$)**: Triggers the **FIRE** state.
+  * **EVENT_OFF ($< 0.4$)**: Resets the system to **NO_FIRE**.
+* **Persistence Analysis**: Fire alerts are only issued if the detection persists consistently across frames, ensuring transient glares are ignored.
+
+
+
+<p align="center">
+  <img src="docs/figs/algorithm_flowchart.png" alt="Algorithm Flowchart" width="750">
+</p>
+
+### **5. Geospatial Localization**
+The system transforms 2D image-space information into precise geographic coordinates using inverse projection based on **Pinhole Camera** geometry:
+1. **Centroid Calculation**: Identifies the geometric center of the detected wildfire mask.
+2. **Ground Sample Distance (GSD)**: Pixel displacement is converted into metric distance on the ground using altitude ($H$) and focal length ($f$).
+3. **GPS Fusion**: The system estimates ground-truth coordinates by fusing drone telemetry with metric offsets via the **Haversine formula** to account for Earth's curvature.
+
+<p align="center">
+  <img src="docs/figs/back_projection_diagram.jpg" alt="Back Projection" width="450">
+  <img src="docs/figs/haversine_vs_euclidean.jpg" alt="Haversine Formula" width="450">
+</p>
 
 ---
 
