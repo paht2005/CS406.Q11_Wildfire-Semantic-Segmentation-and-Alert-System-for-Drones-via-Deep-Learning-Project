@@ -140,7 +140,7 @@ The framework is decomposed into three primary functional modules: **Data Prepro
 
 ### **2. Semantic Segmentation Architecture**
 * **Core Model**: The system utilizes a **U-Net** architecture, featuring a symmetrical contracting path (encoder) for context and an expansive path (decoder) for precise pixel-level localization.
-* **Encoder Backbones**: We implemented **ResNet-34** and **ResNet-50** backbones to leverage deep residual learning, enhancing feature extraction from complex forest textures.
+* **Encoder Backbones**: We implemented **ResNet-34** backbones to leverage deep residual learning, enhancing feature extraction from complex forest textures.
 
 
 
@@ -148,7 +148,9 @@ The framework is decomposed into three primary functional modules: **Data Prepro
   <img src="docs/figs/u-net-segmentation.PNG" alt="U-Net Architecture" width="850">
 </p>
 
-* **Multi-Objective Loss Function**: To address the extreme class imbalance inherent in wildfire imagery, we adopted a composite loss function:
+* **Multi-Objective Loss Function**: To address the severe class imbalance and ambiguous fire boundaries in aerial wildfire imagery, we adopt a **Multi-Objective Loss** that combines Focal Loss, Dice Loss, and Soft Binary Cross-Entropy (Soft BCE). This composite loss encourages robust region overlap, emphasizes hard-to-classify fire pixels, and stabilizes training.
+
+The overall loss function is defined as:
 
 ```math
 \mathcal{L}_{total} = \lambda_1 \mathcal{L}_{Focal} + \lambda_2 \mathcal{L}_{Dice} + \lambda_3 \mathcal{L}_{SoftBCE}
