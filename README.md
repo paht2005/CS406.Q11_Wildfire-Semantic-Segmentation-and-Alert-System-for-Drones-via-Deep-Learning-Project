@@ -145,7 +145,7 @@ The framework is decomposed into three primary functional modules: **Data Prepro
 
 
 <p align="center">
-  <img src="docs/figs/u-net-segmentation.jpg" alt="U-Net Architecture" width="850">
+  <img src="docs/figs/u-net-segmentation.png" alt="U-Net Architecture" width="850">
 </p>
 
 * **Multi-Objective Loss Function**: To address the extreme class imbalance inherent in wildfire imagery, we adopted a composite loss function:
