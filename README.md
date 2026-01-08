@@ -196,7 +196,7 @@ The system transforms 2D image-space information into precise geographic coordin
 
 ### 1. Clone repository
 ```bash
-git clone https://github.com/paht2005/CS406.Q11_Wildfire-Semantic-Segmentation-and-Alert-System-for-Drones-via-Deep-Learning-Project.git.git
+git clone https://github.com/paht2005/CS406.Q11_Wildfire-Semantic-Segmentation-and-Alert-System-for-Drones-via-Deep-Learning-Project.git
 cd CS406.Q11_Wildfire-Semantic-Segmentation-and-Alert-System-for-Drones-via-Deep-Learning-Project
 ```
 
